@@ -1,4 +1,5 @@
 import React from 'react'
+import { Outlet } from 'react-router-dom'
 
 const Layout = () => {
   return (
@@ -6,6 +7,7 @@ const Layout = () => {
         <h1>
             layout
         </h1>
+        <Outlet />
     </div>
   )
 }
