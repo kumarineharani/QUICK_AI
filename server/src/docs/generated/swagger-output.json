@@ -1,0 +1,20 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "QUICK_AI",
+    "description": "Description",
+    "version": "1.0.0"
+  },
+  "host": "localhost:4000",
+  "basePath": "/",
+  "tags": [
+    {
+      "name": "health",
+      "description": "System health checks"
+    }
+  ],
+  "schemes": [
+    "http"
+  ],
+  "paths": {}
+}
