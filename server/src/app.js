@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import { readFile } from 'fs/promises';
+import { clerkMiddleware } from '@clerk/express'
 
 const app = express()
 
@@ -25,12 +26,19 @@ app.use(express.urlencoded({
 app.use(express.static("public"))
 app.use(cookieParser())
 
+// healthcheck
+import healthcheckRouter from "./routes/healthcheck.route.js"
+app.use("/api/v1/healthcheck", healthcheckRouter)
+
+// protected routes
+app.use(clerkMiddleware())
+
 //routes import
-// import featureRouter from "./routes/featureName.route.js"
+import generateArticleRouter from "./routes/ai.route.js";
 
 
 //routes declaration
-// app.use("/api/v1/featureName", featureName)
+app.use("/api/v1/ai/generate-article", generateArticleRouter)
 
 
 export { app }
