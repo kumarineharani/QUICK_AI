@@ -16,17 +16,25 @@ cloudinary.config({
  * @returns {Promise<object|null>} - Cloudinary response or null
  */
 
-const uploadOnCloudinary = async function (fileInput) {
+const uploadOnCloudinary = async function (fileInput, transformations = []) {
 
     try {
 
         if (!fileInput) return null
 
+        const options = {
+            resource_type: "auto",
+        };
+
+        // If transformations are provided, apply them as "eager"
+        if (transformations.length > 0) {
+            options.eager = transformations;
+        }
+
         const response = await cloudinary.uploader
             .upload(
-                fileInput, {
-                resource_type: "auto",
-            }
+                fileInput, 
+                options
             )
         // console.log(`File Uploaded Successfully : ${response.url}`)
 

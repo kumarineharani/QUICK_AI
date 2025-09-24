@@ -35,10 +35,12 @@ app.use(clerkMiddleware())
 
 //routes import
 import aiRouter from "./routes/ai.route.js";
+import userRouter from "./routes/user.route.js"
 
 
 //routes declaration
 app.use("/api/v1/ai", aiRouter)
+app.use("/api/v1", userRouter)
 
 
 export { app }
