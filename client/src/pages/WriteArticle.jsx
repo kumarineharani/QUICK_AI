@@ -1,5 +1,10 @@
 import { Edit, Sparkle } from "lucide-react";
-import React from "react";
+import React, { useState } from "react";
+import axios from 'axios';
+import { useAuth } from "@clerk/clerk-react";
+import toast from "react-hot-toast";
+
+axios.defaults.baseURL = import.meta.env.VITE_BASE_URL;
 
 const WriteArticle = () => {
   const articleLength = [
@@ -10,8 +15,56 @@ const WriteArticle = () => {
 
   const [selectedLength, setSelectedLength] = React.useState(articleLength[0]);
   const [input, setInput] = React.useState("");
+
+  const [loading, setLoading] = useState(false)
+  const [content, setContent] = useState('');
+
+  const { getToken } = useAuth();
+
   const onSubmitHandler = async (e) => {
     e.preventDefault();
+    try{
+      setLoading(true)
+
+      // Handle potential auth token issues
+      let token;
+      try {
+        token = await getToken();
+        if (!token) {
+          toast.error('Please log in to continue');
+          return;
+        }
+      } catch (authError) {
+        console.log('Auth error:', authError);
+        toast.error('Authentication failed. Please check your internet connection and try logging in again.');
+        return;
+      }
+
+      const prompt = `Write an article about ${input} in ${selectedLength.text}`
+
+      const {data} = await axios.post('/ai/generate-article', {prompt, 
+        length:selectedLength.length
+      }, {
+          headers: {Authorization: `Bearer ${token}`}
+        })
+
+      // debugging
+      console.log('API Response:', data); 
+
+      if(data.success && data.data.length > 0 ){
+        console.log('Data Success : ', data.success)
+        setContent(data.data[0].content)
+        toast.success(data.message || 'Article generated successfully!');
+      }
+      else{
+        toast.error(data.message || 'Failed to generate article')
+      }
+    } catch(error){
+        console.log('API error:', error);
+        toast.error(`Error: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -54,11 +107,14 @@ const WriteArticle = () => {
           ))}
         </div>
 
-        <button
+        <button disabled = {loading}
           className="w-full flex justify-center items-center gap-2 bg-gradient-to-r from-[#226BFF]
-          to-[#65ADFF] text-white px-4 py-2 mt-6 text-sm rounded-lg cursor-pointer"
+          to-[#65ADFF] text-white px-4 py-2 mt-6 text-sm rounded-lg cursor-pointer disabled:opacity-50"
         >
-          <Edit className="w-5" />
+          {
+            loading ? <span className="w-4 h-4 my-1 rounded-full border-2 border-t-transparent animate-spin"></span>
+            : <Edit className="w-5" />
+          }
           Generate Article
         </button>
       </form>
@@ -73,12 +129,21 @@ const WriteArticle = () => {
           <h1 className="text-xl font-semibold">Generated article</h1>
         </div>
 
-        <div className="flex-1 flex justify-center items-center">
+        {!content ? (
+          <div className="flex-1 flex justify-center items-center">
           <div className="text-sm flex flex-col items-center gap-5 text-gray-400">
             <Edit className="w-9 h-9" />
-            <p>Enter a topic and click "Generate article" to get started</p>
+            <p>Enter a topic and click "Generate Article" to get started</p>
           </div>
         </div>
+        ) : (
+          <div className="mt-3 h-full overflow-y-scroll text-sm text-slate-600">
+            <div className="whitespace-pre-line leading-relaxed">
+              {content}
+            </div>
+          </div>
+        )}
+        
       </div>
     </div>
   );

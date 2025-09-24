@@ -8,7 +8,7 @@ import {
     resumeReview
 } from '../controllers/ai.controller.js';
 import { auth } from '../middlewares/auth.middleware.js';
-import { upload } from "../middlewares/multer.middleware.js";
+import { upload } from "../middlewares/multer.middlesware.js";
 
 
 const router = Router();
