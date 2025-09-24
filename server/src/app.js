@@ -34,11 +34,11 @@ app.use("/api/v1/healthcheck", healthcheckRouter)
 app.use(clerkMiddleware())
 
 //routes import
-import generateArticleRouter from "./routes/ai.route.js";
+import aiRouter from "./routes/ai.route.js";
 
 
 //routes declaration
-app.use("/api/v1/ai/generate-article", generateArticleRouter)
+app.use("/api/v1/ai", aiRouter)
 
 
 export { app }
