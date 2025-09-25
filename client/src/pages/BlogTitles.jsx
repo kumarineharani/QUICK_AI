@@ -61,10 +61,10 @@ const BlogTitles = () => {
       if (data.success && data.data.length > 0) {
         console.log('Data Success : ', data.success)
         setContent(data.data[0].content)
-        toast.success(data.message || 'Article generated successfully!');
+        toast.success(data.message || 'Blog Title generated successfully!');
       }
       else {
-        toast.error(data.message || 'Failed to generate article')
+        toast.error(data.message || 'Failed to generate blog title')
       }
 
     } catch (error) {
