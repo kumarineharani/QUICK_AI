@@ -4,42 +4,69 @@ import fs from "fs";
 import { ApiError } from '../utils/ApiError.js';
 
 // Configuration
-cloudinary.config({ 
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 
-    api_key: process.env.CLOUDINARY_API_KEY, 
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
     api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-const uploadOnCloudinary = async function (localFilePath) {
-    
+/**
+ * Upload file to Cloudinary
+ * @param {string} fileInput - local file path OR base64 string
+ * @returns {Promise<object|null>} - Cloudinary response or null
+ */
+
+const uploadOnCloudinary = async function (fileInput, transformations = []) {
+
     try {
 
-        if(!localFilePath)  return null
+        if (!fileInput) return null
+
+        const options = {
+            resource_type: "auto",
+        };
+
+        // If transformations are provided, apply them as "eager"
+        if (transformations.length > 0) {
+            options.eager = transformations;
+        }
 
         const response = await cloudinary.uploader
-        .upload(
-            localFilePath, {
-                resource_type: "auto",
-            }
-        )
+            .upload(
+                fileInput, 
+                options
+            )
         // console.log(`File Uploaded Successfully : ${response.url}`)
-        fs.unlinkSync(localFilePath)
+
+        // If it was a local file path → cleanup
+        if (fs.existsSync(fileInput)) {
+            try {
+                fs.unlinkSync(fileInput);
+            } catch (err) {
+                console.error("Failed to delete temp file:", fileInput, err.message);
+            }
+        }
         return response
 
-    } catch (error) {        
-        fs.unlinkSync(localFilePath)
-        return error.msg;
+    } catch (error) {
+        throw new ApiError(500, error.message || "Cloudinary upload failed");
     } finally {                 // Ensures the local files are deleted in upload error situations
-        if (localFilePath && fs.existsSync(localFilePath)) {
+        if (fileInput && fs.existsSync(fileInput)) {
             try {
-                fs.unlinkSync(localFilePath);
+                fs.unlinkSync(fileInput);
             } catch (err) {
-                console.error("Failed to delete temp file:", localFilePath, err.message);
+                console.error("Failed to delete temp file:", fileInput, err.message);
             }
         }
     }
 
 }
+
+/**
+ * Extract public_id from a Cloudinary URL
+ * @param {string} url
+ * @returns {string|null}
+ */
 
 const extractPublicIdFromUrl = function (url) {
     const parts = url.split("/upload/");
@@ -52,6 +79,11 @@ const extractPublicIdFromUrl = function (url) {
     return publicId; // e.g. myfolder/image_x123
 }
 
+/**
+ * Delete image from Cloudinary
+ * @param {string} publicURL
+ * @returns {Promise<object>}
+ */
 
 const deleteImageFromCloudinary = async function (publicURL) {
     try {
@@ -64,19 +96,17 @@ const deleteImageFromCloudinary = async function (publicURL) {
         const response = await cloudinary.uploader.destroy(publicId, {
             resource_type: "image",
         });
-        
+
         return response;
     } catch (error) {
-        console.log(error.msg);
-        throw error.msg;
+        throw new ApiError(500, error.message || "Cloudinary deletion failed");
     }
 };
 
-export { 
+export {
     uploadOnCloudinary,
     deleteImageFromCloudinary
- }
-    
-    
-    
-    
+}
+
+
+
