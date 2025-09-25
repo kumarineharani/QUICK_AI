@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import axios from 'axios';
 import { useAuth } from "@clerk/clerk-react";
 import toast from "react-hot-toast";
+import ReactMarkdown from "react-markdown";
 
 axios.defaults.baseURL = import.meta.env.VITE_BASE_URL;
 
@@ -109,7 +110,7 @@ const WriteArticle = () => {
 
         <button disabled = {loading}
           className="w-full flex justify-center items-center gap-2 bg-gradient-to-r from-[#226BFF]
-          to-[#65ADFF] text-white px-4 py-2 mt-6 text-sm rounded-lg cursor-pointer disabled:opacity-50"
+          to-[#65ADFF] text-white px-4 py-2 mt-6 text-sm rounded-lg cursor-pointer disabled:opacity-30"
         >
           {
             loading ? <span className="w-4 h-4 my-1 rounded-full border-2 border-t-transparent animate-spin"></span>
@@ -138,8 +139,10 @@ const WriteArticle = () => {
         </div>
         ) : (
           <div className="mt-3 h-full overflow-y-scroll text-sm text-slate-600">
-            <div className="whitespace-pre-line leading-relaxed">
-              {content}
+            <div className="reset-tw">
+              <ReactMarkdown>
+                {content}
+              </ReactMarkdown>
             </div>
           </div>
         )}
