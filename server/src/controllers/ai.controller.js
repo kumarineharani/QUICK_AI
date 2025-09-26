@@ -214,7 +214,10 @@ const generateImage = asyncHandler(async (req, res) => {
 const removeImageBackground = asyncHandler(async (req, res) => {
 
     const { userId } = req.auth();
-    const { imagePath } = req.files?.image?.[0]?.path;
+    // console.log("FILES:", req.file || req.files);
+    // console.log("BODY:", req.body);
+    const imagePath = req.file?.path;
+    // return res.json({imagePath});
     const plan = req.plan;
 
     if (!imagePath) {
@@ -228,20 +231,20 @@ const removeImageBackground = asyncHandler(async (req, res) => {
     let insertCreation;
 
     try {
-        const response = await uploadOnCloudinary(imagePath, [
-            {
-                effect: 'background_removal',
-                background_removal: 'remove_the_background'
+        const response = await uploadOnCloudinary(imagePath, [{ 
+            effect: 'background_removal' 
             }
         ]);
 
-        if (!response?.url) {
+        const imageUrl = response.eager?.[0]?.secure_url || response.url;
+
+        if (!imageUrl) {
             throw new ApiError(502, "Error while uploading image.")
         }
 
         insertCreation = await sql` 
             INSERT INTO creations (user_id, prompt, content, type) 
-            VALUES (${userId}, 'Remove background from image', ${response.url}, 'image') 
+            VALUES (${userId}, 'Remove background from image', ${imageUrl}, 'image') 
             RETURNING *
         `;
 
@@ -254,7 +257,7 @@ const removeImageBackground = asyncHandler(async (req, res) => {
     }
 
     return res.status(201).json(
-        new ApiResponse(201, insertCreation, "Image Generated Successfully.")
+        new ApiResponse(201, insertCreation, "Image Background Removed Successfully.")
     )
 })
 

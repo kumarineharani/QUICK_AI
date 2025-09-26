@@ -32,12 +32,7 @@ router.route('/generate-image').post(
 
 router.route('/remove-image-background').post(
     // #swagger.tags = ['remove-image-background']
-    upload.fields([
-        {
-            name: "image",
-            maxCount: 1
-        }
-    ]),
+    upload.single("image"),
     removeImageBackground
 );
 
