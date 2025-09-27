@@ -38,12 +38,7 @@ router.route('/remove-image-background').post(
 
 router.route('/remove-image-object').post(
     // #swagger.tags = ['remove-image-object']
-    upload.fields([
-        {
-            name: "image",
-            maxCount: 1
-        }
-    ]),
+    upload.single("image"),
     removeImageObject
 );
 

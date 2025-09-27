@@ -265,11 +265,21 @@ const removeImageObject = asyncHandler(async (req, res) => {
 
     const { userId } = req.auth();
     const { object } = req.body;
-    const { imagePath } = req.files?.image?.[0]?.path;
+    const imagePath = req.file?.path;
     const plan = req.plan;
+
+    // Debug logging
+    // console.log('req.body:', req.body);
+    // console.log('object value:', object);
+    // console.log('object type:', typeof object);
+    // console.log('object length:', object?.length);
 
     if (!imagePath) {
         throw new ApiError(400, "Image is required.");
+    }
+
+    if(!object || object.trim().split(' ').length > 1){
+         throw new ApiError(400, "Object parameter must be a single word.");
     }
 
     if (plan !== 'premium') {
@@ -285,18 +295,20 @@ const removeImageObject = asyncHandler(async (req, res) => {
             }
         ]);
 
-        if (!response?.url) {
+        const imageUrl = response.eager?.[0]?.secure_url || response.url;
+
+        if (!imageUrl) {
             throw new ApiError(502, "Error while uploading image.")
         }
 
         insertCreation = await sql` 
             INSERT INTO creations (user_id, prompt, content, type) 
-            VALUES (${userId}, ${`Removed ${object} from image`}, ${response.url}, 'image') 
+            VALUES (${userId}, ${`Removed ${object} from image`}, ${imageUrl}, 'image') 
             RETURNING *
         `;
 
         if (!insertCreation) {
-            throw new ApiError(500, "Unable to save image background removal log in database.")
+            throw new ApiError(500, "Unable to save object removal log in database.")
         }
 
     } catch (error) {
@@ -304,7 +316,7 @@ const removeImageObject = asyncHandler(async (req, res) => {
     }
 
     return res.status(201).json(
-        new ApiResponse(201, insertCreation, "Image Generated Successfully.")
+        new ApiResponse(201, insertCreation, "Object Removed Successfully.")
     )
 })
 
