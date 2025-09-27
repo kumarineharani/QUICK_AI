@@ -61,7 +61,7 @@ export const AiToolsData = [
         description: 'Get your resume reviewed by AI to improve your chances of landing your dream job.',
         Icon: FileText,
         bg: { from: '#12B7AC', to: '#08B6CE' },
-        path: '/ai/review-resume'
+        path: '/ai/resume-review'
     }
 ]
 

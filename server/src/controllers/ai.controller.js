@@ -323,7 +323,7 @@ const removeImageObject = asyncHandler(async (req, res) => {
 const resumeReview = asyncHandler(async (req, res) => {
 
     const { userId } = req.auth();
-    const { resume } = req.files?.resume?.[0];
+    const resume = req.files?.resume?.[0];
     const plan = req.plan;
 
     if (plan !== 'premium') {
