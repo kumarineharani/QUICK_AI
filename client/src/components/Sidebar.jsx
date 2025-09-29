@@ -30,7 +30,7 @@ const Sidebar = ({ sidebar, setSidebar }) => {
 
   return (
     <div
-      className={`w-60 bg-white border-r border-grey-200 
+      className={`w-60 bg-white border-r border-gray-200 
       flex flex-col justify-between items-center
       max-sm:absolute top-14 bottom-0
       ${sidebar ? "translate-x-0" : "max-sm:-translate-x-full"}
@@ -43,7 +43,7 @@ const Sidebar = ({ sidebar, setSidebar }) => {
           className="w-13 rounded-full mx-auto"
         />
         <h1 className="mt-1 text-center">{user?.fullName || "Guest"}</h1>
-        <div className="px-6 mt-5 text-sm text-grey-600 font-medium " >
+        <div className="px-6 mt-5 text-sm text-gray-600 font-medium " >
           {navItems.map(({ to, label, Icon }) => (
             <NavLink
               key={to}
@@ -69,7 +69,7 @@ const Sidebar = ({ sidebar, setSidebar }) => {
           ))}
         </div>
       </div>
-      <div className="w-full border-t border-gray-200 p-4 px-7 flex items-center justify-center">
+      <div className="w-full border-t border-gray-200 p-4 px-7 flex items-center justify-between gap-3">
         <div onClick={openUserProfile} className="flex gap-2 items-center cursor-pointer">
           <img src={user.imageUrl} className="w-8 rounded-full" alt="" />
           <div>
@@ -79,7 +79,7 @@ const Sidebar = ({ sidebar, setSidebar }) => {
             Plan
           </div>
         </div>
-        <LogOut onClick={signOut} className="w-4.5 text-grey-400 hover:text-gray-700 transition cursor-pointer"/>
+        <LogOut onClick={signOut} className="w-5 h-5 text-gray-400 hover:text-gray-700 transition cursor-pointer flex-shrink-0"/>
       </div>
     </div>
   );

@@ -12,17 +12,17 @@ const Layout = () => {
   const {user} = useUser();
   return user ?(
     <div className="flex flex-col item-start justify-start h-screen">
-      <nav className="w-full px-8 min-h-14 flex items-center justify-between border-b border-grey-200">
+      <nav className="w-full px-8 min-h-14 flex items-center justify-between border-b border-gray-200">
         <img className="cursor-pointer w-32 sm:w-44 " src={assets.logo} alt="" onClick={() => navigate("/")} />
         {sidebar ? (
           <X
             onClick={() => setSidebar(false)}
-            className="w-6 h-6 text-grey-600 sm:hidden"
+            className="w-6 h-6 text-gray-600 sm:hidden"
           />
         ) : (
           <Menu
             onClick={() => setSidebar(true)}
-            className="w-6 h-6 text-grey-600 sm:hidden"
+            className="w-6 h-6 text-gray-600 sm:hidden"
           />
         )}
       </nav>
