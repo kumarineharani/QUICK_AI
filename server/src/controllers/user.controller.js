@@ -3,7 +3,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { sql } from "../config/database.js"
 
-const getUserCreations = asyncHandler( async (req, res) => {
+const getUserCreations = asyncHandler(async (req, res) => {
     const { userId } = req.auth();
 
     let creations;
@@ -27,7 +27,7 @@ const getUserCreations = asyncHandler( async (req, res) => {
 })
 
 
-const getPublishedCreations = asyncHandler( async (req, res) => {
+const getPublishedCreations = asyncHandler(async (req, res) => {
 
     let creations;
     try {
@@ -38,7 +38,7 @@ const getPublishedCreations = asyncHandler( async (req, res) => {
         `;
 
         if (!creations) {
-            throw new ApiError(500, "Unable to fetch creations from database.")
+            throw new ApiError(500, "Unable to fetch published creations from database.")
         }
 
     } catch (error) {
@@ -46,56 +46,80 @@ const getPublishedCreations = asyncHandler( async (req, res) => {
     }
 
     return res.status(201).json(
-        new ApiResponse(201, creations, "Creations fetched successfully.")
+        new ApiResponse(201, creations, "Published creations fetched successfully.")
     )
 })
 
-const toggleLikeCreations = asyncHandler( async (req, res) => {
+const toggleLikeCreations = asyncHandler(async (req, res) => {
 
     const { userId } = req.auth();
-    const { creation_id } = req.body;
+    const { id } = req.body;
 
     let message;
+    let updatedCreation;
+    let updatedLikes;
+
     try {
 
-        const [creations] = await sql`
+        const [creation] = await sql`
             SELECT * FROM creations WHERE id = ${id}
         `;
 
-        if (!creations) {
-            throw new ApiError(500, "Creation Not Found")
+        if (!creation) {
+            throw new ApiError(404, "Creation Not Found")
         }
 
-        const currentLikes = creation_id.likes;
-        const userIdStr = userId.toString();
-        
-        let updatedLikes;
+        const currentLikes = creation.likes;
 
-        if(currentLikes.includes(userIdStr)){
-            updatedLikes = currentLikes.filter((user)=>user !== userIdStr)
+        // 🟢 Convert Postgres array string → real JS array
+        if (typeof currentLikes === "string") {
+            currentLikes = currentLikes
+                .replace(/[{}]/g, "") // remove curly braces
+                .split(",")
+                .filter((s) => s.trim() !== "");
+        }
+
+        const userIdStr = userId.toString();
+
+        if (currentLikes.includes(userIdStr)) {
+            updatedLikes = currentLikes.filter((user) => user !== userIdStr)
             message = 'Creation Like Removed'
         } else {
             updatedLikes = [...currentLikes, userIdStr]
             message = 'Creation Liked'
         }
 
-        const formattedArray = `{${updatedLikes.json(',')}}`
+        const formattedArray = `{${updatedLikes.join(',')}}`
 
-        await sql`
-            UPDATE creations SET likes = ${formattedArray}::text[] WHERE id = ${creation_id}
+        const result = await sql`
+            UPDATE creations 
+            SET likes = ${formattedArray}::text[], updated_at = NOW()
+            WHERE id = ${id}
+            RETURNING *;
         `;
-        
+        updatedCreation = result[0]; // extract first row
+
+        if (!updatedCreation) {
+            throw new ApiError(404, "Failed to update creation");
+        }
 
     } catch (error) {
+        console.error('Toggle like error:', error);
         throw new ApiError(500, error.message || "Internal Server Error")
     }
 
-    return res.status(201).json(
-        new ApiResponse(201, message)
+    return res.status(200).json(
+        new ApiResponse(200, {
+            id,
+            isLiked: updatedLikes.includes(userId.toString()),
+            likesCount: updatedLikes.length,
+            likes: updatedLikes
+        },
+            message)
     )
 })
 
-export { 
+export {
     getUserCreations,
     getPublishedCreations,
     toggleLikeCreations
