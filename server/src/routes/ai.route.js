@@ -32,23 +32,13 @@ router.route('/generate-image').post(
 
 router.route('/remove-image-background').post(
     // #swagger.tags = ['remove-image-background']
-    upload.fields([
-        {
-            name: "image",
-            maxCount: 1
-        }
-    ]),
+    upload.single("image"),
     removeImageBackground
 );
 
 router.route('/remove-image-object').post(
     // #swagger.tags = ['remove-image-object']
-    upload.fields([
-        {
-            name: "image",
-            maxCount: 1
-        }
-    ]),
+    upload.single("image"),
     removeImageObject
 );
 

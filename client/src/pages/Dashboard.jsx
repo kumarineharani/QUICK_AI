@@ -1,15 +1,52 @@
-import React, { useEffect } from "react";
-import { dummyCreationData } from "../assets/assets";
+import React, { useEffect, useState } from "react";
+// import { dummyCreationData } from "../assets/assets";
 import { Gem, Sparkle } from "lucide-react";
 import { Protect } from "@clerk/clerk-react";
 import CreationItem from "../components/CreationItem";
+import axios from 'axios';
+import { useAuth } from "@clerk/clerk-react";
+import toast from "react-hot-toast";
+
+axios.defaults.baseURL = import.meta.env.VITE_BASE_URL;
 
 
 const Dashboard = () => {
-  const [creation, setCreation] = React.useState([]);
+  const [creation, setCreations] = React.useState([]);
+
+  const [loading, setLoading] = useState(false);
+  const { getToken } = useAuth();
 
   const getDashboardData = async () => {
-    setCreation(dummyCreationData);
+    // setCreation(dummyCreationData);
+    try {
+
+      setLoading(true)
+      let token = await getToken();
+      if (!token) return toast.error("Please log in to continue");
+
+      const { data } = await axios.get('/get-user-creations', {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+
+      // debugging
+      // console.log('API Response:', data);
+
+      if (data.success && data.data.length > 0) {
+        // console.log('Data Success : ', data.success)
+        setCreations(data.data)
+        toast.success(data.message || 'User Creations loaded successfully!');
+      }
+      else {
+        toast.error(data.message || 'Failed to load user creations')
+      }
+
+    } catch (error) {
+      // console.log('API error:', error);
+      toast.error(`Error: ${error.message}`);
+    }
+    finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -46,12 +83,24 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <div className="space-y-3">
-        <p className="mt-6 mb-4">Recent Creation</p>
-        {creation.map((item) => (
-          <CreationItem key={item.id} item={item} />
-        ))}
-      </div>
+      {
+        loading ?
+          (
+            <div className='flex justify-center items-center h-3/4'>
+              <span className="w-11 h-11 rounded-full border-3 border-purple-500 border-t-transparent animate-spin"></span>
+            </div>
+          )
+          :
+          (
+            <div className="space-y-3">
+              <p className="mt-6 mb-4">Recent Creation</p>
+              {creation.map((item) => (
+                <CreationItem key={item.id} item={item} />
+              ))}
+            </div>
+          )
+      }
+
     </div>
   );
 };

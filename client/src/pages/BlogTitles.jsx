@@ -61,10 +61,10 @@ const BlogTitles = () => {
       if (data.success && data.data.length > 0) {
         console.log('Data Success : ', data.success)
         setContent(data.data[0].content)
-        toast.success(data.message || 'Article generated successfully!');
+        toast.success(data.message || 'Blog Title generated successfully!');
       }
       else {
-        toast.error(data.message || 'Failed to generate article')
+        toast.error(data.message || 'Failed to generate blog title')
       }
 
     } catch (error) {
@@ -117,7 +117,7 @@ const BlogTitles = () => {
 
         <button disabled={loading}
           className="w-full flex justify-center items-center gap-2 bg-gradient-to-r from-[#C341F6]
-          to-[#8E37EB] text-white px-4 py-2 mt-6 text-sm rounded-lg cursor-pointer disabled:opacity-30"
+          to-[#8E37EB] text-white px-4 py-2 mt-6 text-sm rounded-lg cursor-pointer disabled:opacity-80"
         >
           {loading ? <span className="w-4 h-4 my-1 rounded-full border-2 border-t-transparent animate-spin"></span> : <Hash className="w-5" />}
           

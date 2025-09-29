@@ -33,6 +33,11 @@ app.use("/api/v1/healthcheck", healthcheckRouter)
 // protected routes
 app.use(clerkMiddleware())
 
+// multer test - Debugging
+// import testRouter from "./routes/multertest.route.js";
+// app.use("/api/v1/multer-check", testRouter);
+
+
 //routes import
 import aiRouter from "./routes/ai.route.js";
 import userRouter from "./routes/user.route.js"
