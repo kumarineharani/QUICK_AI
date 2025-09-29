@@ -104,6 +104,10 @@ const Community = () => {
             c.id === id ? { ...c, likes: data.data.likes } : c
           )
         );
+
+        // Show success toast
+        const isLiked = data.data.likes.includes(user?.id);
+        toast.success(isLiked ? 'Liked Creation!' : 'Like Removed');
       } else {
         // 4. Revert on failure
         setCreations((prev) =>
@@ -143,7 +147,7 @@ const Community = () => {
     }
   }, [user]) // ✅ added dependency
 
-  return (
+  return !loading ? (
     <div className="flex-1 h-full flex flex-col gap-4 p-6">
       Creations
       <div className="bg-white h-full rounded-xl overflow-y-scroll">
@@ -178,6 +182,10 @@ const Community = () => {
           </div>
         ))}
       </div>
+    </div>
+  ) : (
+    <div className='flex justify-center items-center h-full'>
+      <span className="w-10 h-10 my-1 rounded-full border-3 border-primary border-t-transparent animate-spin"></span>
     </div>
   )
 }
