@@ -2,19 +2,234 @@
   "swagger": "2.0",
   "info": {
     "title": "QUICK_AI",
-    "description": "Description",
+    "description": "API documentation for QUICK_AI project. Provides AI and user-related endpoints.",
     "version": "1.0.0"
   },
-  "host": "localhost:4000",
-  "basePath": "/",
+  "host": "localhost:undefined",
+  "basePath": "/api/v1",
   "tags": [
     {
       "name": "health",
       "description": "System health checks"
+    },
+    {
+      "name": "ai",
+      "description": "AI-related operations"
+    },
+    {
+      "name": "user",
+      "description": "User related operations"
     }
   ],
   "schemes": [
     "http"
   ],
-  "paths": {}
+  "paths": {
+    "/api/v1/healthcheck/": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/ai/generate-article": {
+      "post": {
+        "tags": [
+          "ai"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "prompt": {
+                  "example": "any"
+                },
+                "length": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/api/v1/ai/generate-blog-title": {
+      "post": {
+        "tags": [
+          "ai"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "prompt": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/api/v1/ai/generate-image": {
+      "post": {
+        "tags": [
+          "ai"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "prompt": {
+                  "example": "any"
+                },
+                "publish": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/api/v1/ai/remove-image-background": {
+      "post": {
+        "tags": [
+          "ai"
+        ],
+        "description": "",
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/api/v1/ai/remove-image-object": {
+      "post": {
+        "tags": [
+          "ai"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "object": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/api/v1/ai/resume-review": {
+      "post": {
+        "tags": [
+          "ai"
+        ],
+        "description": "",
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/api/v1/get-user-creations": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "description": "",
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/api/v1/get-published-creations": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "description": "",
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/api/v1/toggle-like-creation": {
+      "post": {
+        "tags": [
+          "user"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  }
 }

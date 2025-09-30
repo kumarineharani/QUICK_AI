@@ -16,34 +16,34 @@ const router = Router();
 router.use(auth);
 
 router.route('/generate-article').post(
-    // #swagger.tags = ['generate-article']
+    // #swagger.tags = ['ai']
     generateArticle
 );
 
 router.route('/generate-blog-title').post(
-    // #swagger.tags = ['generate-blog-title']
+    // #swagger.tags = ['ai']
     generateBlogTitle
 );
 
 router.route('/generate-image').post(
-    // #swagger.tags = ['generate-image']
+    // #swagger.tags = ['ai']
     generateImage
 );
 
 router.route('/remove-image-background').post(
-    // #swagger.tags = ['remove-image-background']
+    // #swagger.tags = ['ai']
     upload.single("image"),
     removeImageBackground
 );
 
 router.route('/remove-image-object').post(
-    // #swagger.tags = ['remove-image-object']
+    // #swagger.tags = ['ai']
     upload.single("image"),
     removeImageObject
 );
 
 router.route('/resume-review').post(
-    // #swagger.tags = ['resume-review']
+    // #swagger.tags = ['ai']
     upload.fields([
         {
             name: "resume",
