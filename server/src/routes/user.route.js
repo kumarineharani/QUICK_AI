@@ -12,17 +12,17 @@ const router = Router();
 router.use(auth);
 
 router.route('/get-user-creations').get(
-    // #swagger.tags = ['get-user-creations']
+    // #swagger.tags = ['user']
     getUserCreations
 );
 
 router.route('/get-published-creations').get(
-    // #swagger.tags = ['get-published-creations']
+    // #swagger.tags = ['user']
     getPublishedCreations
 );
 
 router.route('/toggle-like-creation').post(
-    // #swagger.tags = ['toggle-like-creation']
+    // #swagger.tags = ['user']
     toggleLikeCreations
 );
 
