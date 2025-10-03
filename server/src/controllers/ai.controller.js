@@ -344,6 +344,7 @@ const resumeReview = asyncHandler(async (req, res) => {
     const prompt = `Review the following resume and provide constructive feedback on its strengths, weaknesses, and areas for improvement. Resume Content :\n\n${pdfData.text}`;
 
     let insertCreation;
+    const resumePath = resume.path;
 
     try {
         const response = await openai.chat.completions.create({
@@ -371,6 +372,16 @@ const resumeReview = asyncHandler(async (req, res) => {
 
     } catch (error) {
         throw new ApiError(500, error.message || "Internal Server Error")
+    } finally {
+        // ✅ Cleanup temp resume file after processing
+        try {
+            if (resumePath && fs.existsSync(resumePath)) {
+                fs.unlinkSync(resumePath);
+                console.log(`✅ Deleted local file: ${resumePath}`);
+            }
+        } catch (cleanupError) {
+            console.error("❌ Error deleting temp resume file:", cleanupError.message);
+        }
     }
 
     return res.status(201).json(
