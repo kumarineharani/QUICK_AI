@@ -14,11 +14,25 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, {
     customSiteTitle: 'VideoTube API Documentation'
 }));
 
+
+// Read origins from env and split into an array
+const allowedOrigins = process.env.CORS_ORIGIN
+    ? process.env.CORS_ORIGIN.split(",").map(origin => origin.trim())
+    : [];
+
 app.use(cors({
-    origin: process.env.CORS_ORIGIN,
+    origin: (origin, callback) => {
+        // allow requests with no origin (like Postman)
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error("Not allowed by CORS"));
+        }
+    },
     credentials: true
 }))
-app.use(express.json({ limit: "16kb"}))
+
+app.use(express.json({ limit: "16kb" }))
 app.use(express.urlencoded({
     extended: true,
     limit: "16kb"

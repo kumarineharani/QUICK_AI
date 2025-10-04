@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "server": "nodemon src/server.js",
-    "start": "node server.js",
+    "start": "node src/server.js",
     "swagger": "node src/config/swagger.js"
   },
   "keywords": [],
