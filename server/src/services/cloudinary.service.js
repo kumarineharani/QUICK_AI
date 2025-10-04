@@ -11,6 +11,23 @@ cloudinary.config({
 });
 
 /**
+ * Safely delete a file from the file system
+ * @param {string} filePath - Path to the file to delete
+ */
+const deleteLocalFile = (filePath) => {
+    if (!filePath) return;
+    
+    try {
+        if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+            console.log(`✅ Deleted local file: ${filePath}`);
+        }
+    } catch (error) {
+        console.error(`❌ Failed to delete file: ${filePath}`, error.message);
+    }
+};
+
+/**
  * Upload file to Cloudinary
  * @param {string} fileInput - local file path OR base64 string
  * @returns {Promise<object|null>} - Cloudinary response or null
@@ -39,24 +56,14 @@ const uploadOnCloudinary = async function (fileInput, transformations = []) {
         // console.log(`File Uploaded Successfully : ${response.url}`)
 
         // If it was a local file path → cleanup
-        if (fs.existsSync(fileInput)) {
-            try {
-                fs.unlinkSync(fileInput);
-            } catch (err) {
-                console.error("Failed to delete temp file:", fileInput, err.message);
-            }
-        }
         return response
 
     } catch (error) {
         throw new ApiError(500, error.message || "Cloudinary upload failed");
     } finally {                 // Ensures the local files are deleted in upload error situations
-        if (fileInput && fs.existsSync(fileInput)) {
-            try {
-                fs.unlinkSync(fileInput);
-            } catch (err) {
-                console.error("Failed to delete temp file:", fileInput, err.message);
-            }
+        // IMPORTANT: Delete local file 
+        if (typeof fileInput === 'string' && !fileInput.startsWith('data:')) {
+            deleteLocalFile(fileInput);
         }
     }
 
@@ -105,7 +112,8 @@ const deleteImageFromCloudinary = async function (publicURL) {
 
 export {
     uploadOnCloudinary,
-    deleteImageFromCloudinary
+    deleteImageFromCloudinary,
+    deleteLocalFile
 }
 
 
