@@ -19,7 +19,7 @@ const BlogTitles = () => {
     "Education",
   ];
 
-  const [selectedCategory, setSelectedCategory] = useState(blogCategories['General']);
+  const [selectedCategory, setSelectedCategory] = useState(blogCategories[0]);
   const [input, setInput] = useState("");
 
   const [loading, setLoading] = useState(false)
@@ -47,7 +47,7 @@ const BlogTitles = () => {
         return;
       }
 
-      const prompt = `Generate a blog title for the keyword ${input} in the category ${selectedCategory}`;
+      const prompt = `List exactly 5 numbered blog titles for the keyword "${input}" in the "${selectedCategory}" category. Return only the numbered list, no extra text.`;
 
       const { data } = await axios.post('/ai/generate-blog-title', {
         prompt

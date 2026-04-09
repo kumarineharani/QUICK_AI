@@ -9,9 +9,9 @@ axios.defaults.baseURL = import.meta.env.VITE_BASE_URL;
 
 const WriteArticle = () => {
   const articleLength = [
-    { length: 800, text: "short (500-800 words)" },
-    { length: 1200, text: "Medium (800-1200 words)" },
-    { length: 1600, text: "long (1200+ words)" },
+    { length: 1200, text: "Short (500-800 words)", minWords: 500, maxWords: 800 },
+    { length: 1800, text: "Medium (800-1200 words)", minWords: 800, maxWords: 1200 },
+    { length: 2400, text: "Long (1200+ words)", minWords: 1200, maxWords: 1600 },
   ];
 
   const [selectedLength, setSelectedLength] = React.useState(articleLength[0]);
@@ -24,7 +24,7 @@ const WriteArticle = () => {
 
   const onSubmitHandler = async (e) => {
     e.preventDefault();
-    try{
+    try {
       setLoading(true)
 
       // Handle potential auth token issues
@@ -41,28 +41,31 @@ const WriteArticle = () => {
         return;
       }
 
-      const prompt = `Write an article about ${input} in ${selectedLength.text}`
+      const prompt = `Write a complete, detailed article about "${input}". 
+                      The article must be between ${selectedLength.minWords} and ${selectedLength.maxWords} words. 
+                      Include an introduction, multiple body paragraphs, and a conclusion.`
 
-      const {data} = await axios.post('/ai/generate-article', {prompt, 
-        length:selectedLength.length
+      const { data } = await axios.post('/ai/generate-article', {
+        prompt,
+        length: selectedLength.length
       }, {
-          headers: {Authorization: `Bearer ${token}`}
-        })
+        headers: { Authorization: `Bearer ${token}` }
+      })
 
       // debugging
-      console.log('API Response:', data); 
+      console.log('API Response:', data);
 
-      if(data.success && data.data.length > 0 ){
+      if (data.success && data.data.length > 0) {
         console.log('Data Success : ', data.success)
         setContent(data.data[0].content)
         toast.success(data.message || 'Article generated successfully!');
       }
-      else{
+      else {
         toast.error(data.message || 'Failed to generate article')
       }
-    } catch(error){
-        console.log('API error:', error);
-        toast.error(`Error: ${error.message}`);
+    } catch (error) {
+      console.log('API error:', error);
+      toast.error(`Error: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -96,10 +99,9 @@ const WriteArticle = () => {
             <span
               onClick={() => setSelectedLength(item)}
               className={`text-xs px-4 py-1 border rounded-full cursor-pointer
-                ${
-                  selectedLength.text === item.text
-                    ? "bg-blue-50 text-blue-700 border-blue-300"
-                    : "text-gray-500 border-gray-300"
+                ${selectedLength.text === item.text
+                  ? "bg-blue-50 text-blue-700 border-blue-300"
+                  : "text-gray-500 border-gray-300"
                 } `}
               key={index}
             >
@@ -108,13 +110,13 @@ const WriteArticle = () => {
           ))}
         </div>
 
-        <button disabled = {loading}
+        <button disabled={loading}
           className="w-full flex justify-center items-center gap-2 bg-gradient-to-r from-[#226BFF]
           to-[#65ADFF] text-white px-4 py-2 mt-6 text-sm rounded-lg cursor-pointer disabled:opacity-80"
         >
           {
             loading ? <span className="w-4 h-4 my-1 rounded-full border-2 border-t-transparent animate-spin"></span>
-            : <Edit className="w-5" />
+              : <Edit className="w-5" />
           }
           Generate Article
         </button>
@@ -132,11 +134,11 @@ const WriteArticle = () => {
 
         {!content ? (
           <div className="flex-1 flex justify-center items-center">
-          <div className="text-sm flex flex-col items-center gap-5 text-gray-400">
-            <Edit className="w-9 h-9" />
-            <p>Enter a topic and click "Generate Article" to get started</p>
+            <div className="text-sm flex flex-col items-center gap-5 text-gray-400">
+              <Edit className="w-9 h-9" />
+              <p>Enter a topic and click "Generate Article" to get started</p>
+            </div>
           </div>
-        </div>
         ) : (
           <div className="mt-3 h-full overflow-y-scroll text-sm text-slate-600">
             <div className="reset-tw">
@@ -146,7 +148,7 @@ const WriteArticle = () => {
             </div>
           </div>
         )}
-        
+
       </div>
     </div>
   );

@@ -35,7 +35,7 @@ const generateArticle = asyncHandler(async (req, res) => {
 
     try {
         const response = await openai.chat.completions.create({
-            model: "gemini-2.0-flash",
+            model: "gemini-2.5-flash-lite",
             messages: [
                 {
                     role: "user",
@@ -43,7 +43,8 @@ const generateArticle = asyncHandler(async (req, res) => {
                 },
             ],
             temperature: 0.7,
-            max_completion_tokens: length,
+            max_tokens: length,
+            reasoning_effort: "none",
         });
 
         const content = response.choices[0]?.message?.content;
@@ -71,7 +72,10 @@ const generateArticle = asyncHandler(async (req, res) => {
         }
 
     } catch (error) {
-        throw new ApiError(500, error.message)
+        console.error("Status:", error.response?.status)
+        console.error("Error body:", error.response?.data?.toString())
+
+        throw new ApiError(500, error.message);
     }
 
     return res.status(201).json(
@@ -98,11 +102,13 @@ const generateBlogTitle = asyncHandler(async (req, res) => {
     let insertCreation;
 
     try {
+
         const response = await openai.chat.completions.create({
-            model: "gemini-2.0-flash",
+            model: "gemini-2.5-flash-lite",
             messages: [{ role: "user", content: prompt }],
             temperature: 0.7,
-            max_completion_tokens: 100,
+            max_tokens: 300,
+            reasoning_effort: "none",
         });
 
         const content = response.choices[0]?.message?.content;
@@ -117,7 +123,7 @@ const generateBlogTitle = asyncHandler(async (req, res) => {
             RETURNING *
         `;
 
-        if (!insertCreation) {
+        if (!insertCreation?.length) {
             throw new ApiError(500, "Unable to save blog title in database.")
         }
 
@@ -130,7 +136,9 @@ const generateBlogTitle = asyncHandler(async (req, res) => {
         }
 
     } catch (error) {
-        throw new ApiError(500, error.message)
+        console.error("Status:", error.response?.status)
+        console.error("Error body:", error.response?.data?.toString())
+        throw new ApiError(500, error.message);
     }
 
     return res.status(201).json(
@@ -141,7 +149,7 @@ const generateBlogTitle = asyncHandler(async (req, res) => {
 const generateImage = asyncHandler(async (req, res) => {
 
     const { userId } = req.auth();
-    const { prompt, publish } = req.body;
+    const { prompt, publish, style } = req.body;
     const plan = req.plan;
 
     if (!prompt) {
@@ -157,24 +165,24 @@ const generateImage = asyncHandler(async (req, res) => {
     try {
         const formData = new FormData()
         formData.append('prompt', prompt)
-        formData.append('style', 'realistic')
-        formData.append('aspect_ratio', '3:4')
-        formData.append('seed', 5)
+        // formData.append('style', style)
+        // formData.append('aspect_ratio', '16:9')
+        // formData.append('seed', '5') 
 
-        // const data = await axios.post('https://clipdrop-api.co/text-to-image/v1', formData, {
-        //     headers: {
-        //         'x-api-key': process.env.CLIPDROP_API_KEY,
-        //     },
-        //     responseType: 'arrayBuffer',
-        // })
-
-        const data = await axios.post('https://api.vyro.ai/v2/image/generations', formData, {
+        const data = await axios.post('https://clipdrop-api.co/text-to-image/v1', formData, {
             headers: {
-                'Authorization': process.env.IMAGINE_TOKEN,
-                ...formData.getHeaders(),
+                'x-api-key': process.env.CLIPDROP_API_KEY,
             },
             responseType: 'arraybuffer',
         })
+
+        // const data = await axios.post('https://api.vyro.ai/v2/image/generations', formData, {
+        //     headers: {
+        //         'Authorization': `Bearer ${process.env.IMAGINE_TOKEN}`,
+        //         // ...formData.getHeaders(),
+        //     },
+        //     responseType: 'arraybuffer',
+        // })
 
         if (!data || !data.data) {
             throw new ApiError(502, "No content received from AI provider.");
@@ -191,7 +199,7 @@ const generateImage = asyncHandler(async (req, res) => {
         if (!response?.url) {
             throw new ApiError(502, "Error while uploading image.")
         }
-
+        console.info(response.url)
         insertCreation = await sql` 
             INSERT INTO creations (user_id, prompt, content, type, publish) 
             VALUES (${userId}, ${prompt}, ${response.url}, 'image', ${publish ?? false}) 
@@ -203,6 +211,8 @@ const generateImage = asyncHandler(async (req, res) => {
         }
 
     } catch (error) {
+        console.error("Status:", error.response?.status)
+        console.error("Error body:", error.response?.data?.toString())
         throw new ApiError(500, error.message || "Internal Server Error")
     }
 
@@ -231,9 +241,9 @@ const removeImageBackground = asyncHandler(async (req, res) => {
     let insertCreation;
 
     try {
-        const response = await uploadOnCloudinary(imagePath, [{ 
-            effect: 'background_removal' 
-            }
+        const response = await uploadOnCloudinary(imagePath, [{
+            effect: 'background_removal'
+        }
         ]);
 
         const imageUrl = response.eager?.[0]?.secure_url || response.url;
@@ -253,6 +263,8 @@ const removeImageBackground = asyncHandler(async (req, res) => {
         }
 
     } catch (error) {
+        console.error("Status:", error.response?.status)
+        console.error("Error body:", error.response?.data?.toString())
         throw new ApiError(500, error.message || "Internal Server Error")
     }
 
@@ -278,8 +290,8 @@ const removeImageObject = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Image is required.");
     }
 
-    if(!object || object.trim().split(' ').length > 1){
-         throw new ApiError(400, "Object parameter must be a single word.");
+    if (!object || object.trim().split(' ').length > 1) {
+        throw new ApiError(400, "Object parameter must be a single word.");
     }
 
     if (plan !== 'premium') {
@@ -312,6 +324,8 @@ const removeImageObject = asyncHandler(async (req, res) => {
         }
 
     } catch (error) {
+        console.error("Status:", error.response?.status)
+        console.error("Error body:", error.response?.data?.toString())
         throw new ApiError(500, error.message || "Internal Server Error")
     }
 
@@ -326,32 +340,52 @@ const resumeReview = asyncHandler(async (req, res) => {
     const resume = req.files?.resume?.[0];
     const plan = req.plan;
 
+    const resumePath = resume?.path;
+
     if (plan !== 'premium') {
         throw new ApiError(403, "This feature is only available for premium subscriber.")
     }
 
-    if (!resume?.path) {
+    if (!resumePath) {
         throw new ApiError(400, "Resume is required.");
     }
 
-    if(resume.size > 5 * 1024 * 1024){
+    if (resume.size > 5 * 1024 * 1024) {
+        fs.existsSync(resumePath) && fs.unlinkSync(resumePath);
         throw new ApiError(403, "Resume file size exceeds allowed size (5MB).");
     }
 
     const dataBuffer = fs.readFileSync(resume.path);
     const pdfData = await pdf(dataBuffer);  // getting pdf -> text
 
-    const prompt = `Review the following resume and provide constructive feedback on its strengths, weaknesses, and areas for improvement. Resume Content :\n\n${pdfData.text}`;
+    const prompt = `
+        You are a professional resume reviewer.
+
+        Analyze the resume below and return:
+
+        1. 4 Strengths
+        2. 4 Weaknesses
+        3. 4 Improvements
+
+        Rules:
+        - Use bullet points
+        - Be concise but meaningful
+        - Keep total length between 400–600 words
+        - No extra explanation outside sections
+
+        Resume:
+        ${pdfData.text}
+        `;
 
     let insertCreation;
-    const resumePath = resume.path;
 
     try {
+       
         const response = await openai.chat.completions.create({
-            model: "gemini-2.0-flash",
+            model: "gemini-2.5-flash-lite",
             messages: [{ role: "user", content: prompt }],
             temperature: 0.7,
-            max_completion_tokens: 1000,
+            max_tokens: 1500,
         });
 
         const content = response.choices[0]?.message?.content;
@@ -366,11 +400,13 @@ const resumeReview = asyncHandler(async (req, res) => {
             RETURNING *
         `;
 
-        if (!insertCreation) {
+        if (!insertCreation?.length) {
             throw new ApiError(500, "Unable to save resume review log in database.")
         }
 
     } catch (error) {
+        console.error("Status:", error.response?.status)
+        console.error("Error body:", error.response?.data?.toString())
         throw new ApiError(500, error.message || "Internal Server Error")
     } finally {
         // ✅ Cleanup temp resume file after processing

@@ -8,18 +8,16 @@ axios.defaults.baseURL = import.meta.env.VITE_BASE_URL;
 
 const GenerateImages = () => {
 
-  const imageStyle = [
-    'Realistic',
-    'Anime style',
-    'Cartoon style',
-    'Ghibli style',
-    'Fantasy style',
-    'Realistic style',
-    '3D style',
-    'portrait style',
-  ];
+  // const imageStyle = [
+  //   { label: 'Realistic',     value: 'realistic'      },
+  //   { label: 'Anime',         value: 'anime'          },
+  //   { label: 'Flux Schnell',  value: 'flux-schnell'   },
+  //   { label: 'Flux Dev Fast', value: 'flux-dev-fast'  },
+  //   { label: 'Flux Dev',      value: 'flux-dev'       },
+  //   { label: 'Imagine Turbo', value: 'imagine-turbo'  },
+  // ];
   
-  const [selectedStyle, setSelectedStyle] = useState(imageStyle[0]);
+  // const [selectedStyle, setSelectedStyle] = useState(imageStyle[0].value);
   const [input, setInput] = useState("");
   const [publish, setPublish] = useState(false);
 
@@ -48,10 +46,10 @@ const GenerateImages = () => {
         return;
       }
 
-      const prompt = `Generate an image of ${input} in the style ${selectedStyle}`;
+      const prompt = `Generate an image of ${input}`;
 
       const { data } = await axios.post('/ai/generate-image', {
-        prompt, publish
+        prompt, publish,
       }, {
         headers: { Authorization: `Bearer ${token}` }
       })
@@ -99,23 +97,23 @@ const GenerateImages = () => {
           required
         />
 
-        <p className="mt-4 text-sm font-medium">Style</p>
+        {/* <p className="mt-4 text-sm font-medium">Style</p>
         <div className="flex gap-2 mt-2 flex-wrap">
           {imageStyle.map((item) => (
             <span
-              onClick={() => setSelectedStyle(item)}
+              onClick={() => setSelectedStyle(item.value)}
               className={`text-xs px-4 py-1 border rounded-full cursor-pointer
                 ${
-                  selectedStyle === item
+                  selectedStyle === item.value
                     ? "bg-blue-50 text-green-700 border-green-300"
                     : "text-gray-500 border-gray-300"
                 } `}
               key={item}
             >
-              {item}
+              {item.label}
             </span>
           ))}
-        </div>
+        </div> */}
 
         <div className="my-6 flex items-center gap-2">
           <label className="relative cursor-pointer">

@@ -61,5 +61,17 @@ import userRouter from "./routes/user.route.js"
 app.use("/api/v1/ai", aiRouter)
 app.use("/api/v1", userRouter)
 
+app.use((err, req, res, next) => {
+    console.error("Global Error:", {
+        status: err.statusCode,
+        message: err.message,
+        stack: err.stack
+    });
+
+    res.status(err.statusCode || 500).json({
+        success: false,
+        message: err.message || "Internal Server Error"
+    });
+});
 
 export { app }
